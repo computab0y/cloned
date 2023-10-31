@@ -1,0 +1,2 @@
+#!/bin/sh
+./oc.exe -n dso-iac-argocd patch argocd/iac-argocd --type=merge -p='{"spec":{"server":{"insecure":true,"route":{"enabled":true,"tls":{"insecureEdgeTerminationPolicy":"Redirect","termination":"edge"}}}}}'

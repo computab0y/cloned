@@ -1,0 +1,71 @@
+apiVersion: tekton.dev/v1beta1
+kind: ClusterTask
+metadata:
+  name: cosign-verify
+spec:
+  description: These tasks make it possible to use cosign within your Tekton pipelines to verify signed images
+  params:
+    - name: ToolBoxUrl
+      type: string
+    - name: quayUrl
+      type: string
+    - name: quayUser
+      type: string
+    - name: quayToken
+      type: string
+    - name: repoPath
+      type: string
+    - name: imageTag
+      type: string
+  steps:
+  - image: '$(params.ToolBoxUrl)'
+    name: cosign-verify
+    resources: {}
+    env:
+      - name: QUAY_URL
+        value: $(params.quayUrl)
+      - name: REPO_PATH
+        value: $(params.repoPath)
+      - name: IMAGE_TAG
+        value: $(params.imageTag)
+      - name: QUAY_USER
+        value: $(params.quayUser)
+      - name: QUAY_TOKEN
+        value: $(params.quayToken)
+      - name: COSIGN_PUB
+        valueFrom:
+          secretKeyRef:
+            name: signing-secrets
+            key: cosign.pub
+    script: >
+      #!/bin/bash
+
+      echo "Verifying... $QUAY_URL/$REPO_PATH:$IMAGE_TAG"
+
+      echo "$COSIGN_PUB" > cosign.pub
+      
+      CMD1="cosign login -u $QUAY_USER -p $QUAY_TOKEN $QUAY_URL"
+      
+      CMD2="cosign verify --key cosign.pub $QUAY_URL/$REPO_PATH:$IMAGE_TAG"
+
+      echo $CMD1
+
+      ${CMD1} &> cmd1-result
+
+      cat cmd1-result
+
+      echo $CMD2
+
+      ${CMD2} &> cmd2-result
+
+      cat cmd2-result
+
+      err=$?
+
+      ERR_MSG="Failed to verify image"
+
+      if [[ ${err} -ne 0 ]]; then
+
+        echo "${ERR_MSG}"
+        exit 1
+      fi

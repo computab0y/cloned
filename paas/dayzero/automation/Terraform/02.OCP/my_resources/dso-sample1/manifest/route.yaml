@@ -1,0 +1,26 @@
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: dso-sample
+  namespace: dso-sample
+  labels:
+    app: dso-sample
+    app.kubernetes.io/component: dso-sample
+    app.kubernetes.io/instance: dso-sample
+    app.kubernetes.io/name: dso-sample
+    app.kubernetes.io/part-of: dso-sample
+    app.openshift.io/runtime-version: v1
+  annotations:
+    openshift.io/host.generated: 'true'
+spec:
+  host: dso-sample-dso-sample.apps.ocp2.azure.dso.digital.mod.uk
+  to:
+    kind: Service
+    name: dso-sample
+    weight: 100
+  port:
+    targetPort: 3333-tcp
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+  wildcardPolicy: None

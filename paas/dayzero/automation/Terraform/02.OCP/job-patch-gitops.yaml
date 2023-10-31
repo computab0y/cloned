@@ -1,0 +1,101 @@
+kind: Job
+apiVersion: batch/v1
+metadata:
+  name: 255771a999667ceec49c1cb426c23816678f06df5923c6620335abb1e186c59
+  namespace: openshift-marketplace
+spec:
+  parallelism: 1
+  completions: 1
+  activeDeadlineSeconds: 600
+  backoffLimit: 3
+  selector:
+    matchLabels:
+      controller-uid: ac852b4e-fbfb-4785-8ae5-f41194df1e3b
+  template:
+    metadata:
+      name: 255771a999667ceec49c1cb426c23816678f06df5923c6620335abb1e186c59
+      creationTimestamp: null
+      labels:
+        controller-uid: ac852b4e-fbfb-4785-8ae5-f41194df1e3b
+        job-name: 255771a999667ceec49c1cb426c23816678f06df5923c6620335abb1e186c59
+    spec:
+      volumes:
+        - name: bundle
+          emptyDir: {}
+        - name: util
+          emptyDir: {}
+      initContainers:
+        - name: util
+          image: >-
+            quay.io/openshift-release-dev/ocp-v4.0-art-dev@sha256:b0f5a089001654d82050bc8d01203b2a51a7ed5b2aa7800603c125604a11da9e
+          command:
+            - /bin/cp
+            - '-Rv'
+            - /bin/cpb
+            - /util/cpb
+          resources:
+            requests:
+              cpu: 10m
+              memory: 50Mi
+          volumeMounts:
+            - name: util
+              mountPath: /util
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          imagePullPolicy: IfNotPresent
+        - name: pull
+          image: >-
+            quay.internal.cloudapp.net/import2/openshift-gitops-1/gitops-operator-bundle@sha256:414ec6ec542ac000f71c6e5b62d19687b3e6bbdf6b719b0113dd08ce5ceaddfe
+          command:
+            - /util/cpb
+            - /bundle
+          resources:
+            requests:
+              cpu: 10m
+              memory: 50Mi
+          volumeMounts:
+            - name: bundle
+              mountPath: /bundle
+            - name: util
+              mountPath: /util
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          imagePullPolicy: Always
+      containers:
+        - resources:
+            requests:
+              cpu: 10m
+              memory: 50Mi
+          terminationMessagePath: /dev/termination-log
+          name: extract
+          command:
+            - opm
+            - alpha
+            - bundle
+            - extract
+            - '-m'
+            - /bundle/
+            - '-n'
+            - openshift-marketplace
+            - '-c'
+            - 255771a999667ceec49c1cb426c23816678f06df5923c6620335abb1e186c59
+            - '-z'
+          env:
+            - name: CONTAINER_IMAGE
+              value: >-
+                quay.internal.cloudapp.net/import2/openshift-gitops-1/gitops-operator-bundle@sha256:414ec6ec542ac000f71c6e5b62d19687b3e6bbdf6b719b0113dd08ce5ceaddfe
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - name: bundle
+              mountPath: /bundle
+          terminationMessagePolicy: File
+          image: >-
+            quay.io/openshift-release-dev/ocp-v4.0-art-dev@sha256:7599b4734c2d7f0e9d779d5bbfcd1af2184d0e8ace662fb4b927e55fefe36a0d
+      restartPolicy: Never
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst
+      securityContext: {}
+      schedulerName: default-scheduler
+  completionMode: NonIndexed
+  suspend: false
+

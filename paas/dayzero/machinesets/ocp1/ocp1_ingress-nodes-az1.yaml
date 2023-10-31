@@ -1,0 +1,66 @@
+apiVersion: machine.openshift.io/v1beta1
+kind: MachineSet
+metadata:
+  name: ocp1-kp7vk-ingress-uksouth1
+  namespace: openshift-machine-api
+  labels:
+    machine.openshift.io/cluster-api-cluster: ocp1-kp7vk
+    machine.openshift.io/cluster-api-machine-role: worker
+    machine.openshift.io/cluster-api-machine-type: worker
+spec:
+  replicas: 0
+  selector:
+    matchLabels:
+      machine.openshift.io/cluster-api-cluster: ocp1-kp7vk
+      machine.openshift.io/cluster-api-machineset: ocp1-kp7vk-ingress-uksouth1
+  template:
+    metadata:
+      labels:
+        machine.openshift.io/cluster-api-cluster: ocp1-kp7vk
+        machine.openshift.io/cluster-api-machine-role: worker
+        machine.openshift.io/cluster-api-machine-type: worker
+        machine.openshift.io/cluster-api-machineset: ocp1-kp7vk-ingress-uksouth1
+    spec:
+      metadata:
+        labels:
+          node-role.kubernetes.io/infra: ""
+          node-role.kubernetes.io/ingress: ""
+      taints: 
+        - key: node-role.kubernetes.io/ingress
+          effect: NoSchedule
+          value: "true"
+        - key: node-role.kubernetes.io/ingress
+          effect: NoExecute
+          value: "true"
+      providerSpec:
+        value:
+          osDisk:
+            diskSizeGB: 256
+            managedDisk:
+              storageAccountType: Premium_LRS
+            osType: Linux
+          networkResourceGroup: rg-ocp1mgmt-prod-uks
+          userDataSecret:
+            name: worker-user-data
+          vnet: vnet-ocp1-prod-uks
+          credentialsSecret:
+            name: azure-cloud-credentials
+            namespace: openshift-machine-api
+          zone: '1'
+          metadata:
+            creationTimestamp: null
+          publicIP: false
+          resourceGroup: rg-ocp1-prod-uks
+          kind: AzureMachineProviderSpec
+          location: uksouth
+          vmSize: Standard_D4s_v3
+          image:
+            offer: ''
+            publisher: ''
+            resourceID: >-
+              /resourceGroups/rg-ocp1-prod-uks/providers/Microsoft.Compute/images/ocp1-kp7vk
+            sku: ''
+            version: ''
+          managedIdentity: ocp1-kp7vk-identity
+          subnet: ingress_subnet
+          apiVersion: azureproviderconfig.openshift.io/v1beta1

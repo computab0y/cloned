@@ -1,0 +1,15 @@
+apiVersion: fileintegrity.openshift.io/v1alpha1
+kind: FileIntegrity
+metadata:
+  name: infra-fileintegrity
+spec:
+  nodeSelector:
+    node-role.kubernetes.io/infra: ""
+  config: {}
+  tolerations:
+    - effect: NoSchedule
+      key: node-role.kubernetes.io/infra
+      operator: Exists
+    - effect: NoExecute
+      key: node-role.kubernetes.io/infra
+      operator: Exists

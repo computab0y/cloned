@@ -1,0 +1,15 @@
+# Replace cluster-api-machineset (machineset name)
+source:
+  kind: ConfigMap
+  name: env-properties
+  fieldPath: data.WORKER_MACHINESET_NAME
+  version: v1
+targets:
+  - select:
+      name: template-worker-machineset
+      kind: MachineSet
+    fieldPaths:
+#    - metadata.labels.[machine.openshift.io/cluster-api-machineset]
+    - spec.selector.matchLabels.[machine.openshift.io/cluster-api-machineset]
+    - spec.template.metadata.labels.[machine.openshift.io/cluster-api-machineset]
+    - metadata.name

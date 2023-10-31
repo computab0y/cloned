@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: operator-group-sync
+  namespace: openshift-gitops
+spec:
+  project: default
+  source:
+    repoURL: https://gitea-with-admin-dso-gitea.apps.ocp1.azure.dso.digital.mod.uk/dso-mgr/dso-platform.git
+    targetRevision: main
+    path: dayzero/legion/cohorts/openshift/group-sync/operator/base
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: group-sync-operator
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

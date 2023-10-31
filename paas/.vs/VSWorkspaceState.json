@@ -1,0 +1,14 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\azureinfra",
+    "\\azureinfra\\SO1\\app-gw",
+    "\\azureinfra\\SO1\\app-gw\\policy-rules",
+    "\\azureinfra\\SO1\\mgmt",
+    "\\azureinfra\\SO2",
+    "\\azureinfra\\SO2\\app-gw",
+    "\\azureinfra\\SO2\\app-gw\\policy-rules"
+  ],
+  "SelectedNode": "\\azureinfra\\SO2\\app-gw\\policy-rules\\variables.tf",
+  "PreviewInSolutionExplorer": false
+}

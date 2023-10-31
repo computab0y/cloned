@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: dso-iac-argocd-secret
+  namespace: dso-iac-argocd
+  labels:
+    argocd.argoproj.io/secret-type: repository
+stringData:
+  url: https://github.com/defencedigital/dso-pipeline-integration
+  password: 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
+  username: not-used

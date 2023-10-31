@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: dso-iac-argocd-secret
+  namespace: openshift-gitops
+  labels:
+    argocd.argoproj.io/secret-type: repository
+stringData:
+  url: https://gitea-with-admin-dso-gitea.apps.ocp1.azure.dso.digital.mod.uk/dso-mgr/dso-platform.git
+  password: TY4nIRdqv1uxdgDru5cN42aKyZQc8c0Y
+  username: dso-mgr

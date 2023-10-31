@@ -1,0 +1,275 @@
+
+terraform {
+  required_version = ">= 0.13"
+  required_providers {
+    kubectl = {
+      source  = "registry.terraform.io/gavinbunney/kubectl"  # for offline plugin setup
+      version = ">= 1.14.0"
+    }
+  }
+}
+
+provider "kubectl" {
+  host                   = "https://api.ocp3.azure.dso.digital.mod.uk:6443"  # o dev              ### UPDATE-REQUIRED
+#  host                   = "https://api.ocp3.azure.dso.digital.mod.uk:6443"  # Sandbox (SO1)
+#  host                   = "https://api.ocp4.azure.dso.digital.mod.uk:6443"  # Sandbox (SO2)
+#  host                   = "https://console-openshift-console.apps.ocp1.ocp.local:6443"  # Sandbox (asdk)
+  token                  = "sha256~jg2yMYxXXeUMa37T5u9X93hJiy3xuYyzMqZQcmfvpjc"                                 ### UPDATE-REQUIRED
+  load_config_file       = false
+  insecure = true  # No valid cert and TLS check resulting in x509: certificate signed by unknown authority
+
+}
+# ******** CREATE NAMESPACE ARGOCD - ASDK_OK
+resource "kubectl_manifest" "create-argocd-namespace" {
+    yaml_body = <<YAML
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dso-iac-argocd
+  labels:
+    argocd.argoproj.io/managed-by: "dso-iac-argocd"
+  annotations:
+    openshift.io/display-name: 'dso-iac-argocd'
+    openshift.io/description: "hosts the argocd"
+YAML
+}
+
+# ******** CREATE NAMESPACE dso-gitea ASDK_OK
+resource "kubectl_manifest" "create-dso-gitea-namespace" {
+    yaml_body = <<YAML
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: dso-gitea
+  labels:
+    argocd.argoproj.io/managed-by: "dso-iac-argocd"
+  annotations:
+    openshift.io/display-name: 'dso-gitea'
+    openshift.io/description: "hosts gitea"
+YAML
+}
+
+# ******** INSTALL ARGOCD OPERATOR  ASDK_CHECK
+resource "kubectl_manifest" "install-argocd-operator" {
+    yaml_body = <<YAML
+
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: openshift-gitops-operator
+  namespace: openshift-operators
+spec:
+  channel: stable
+  name: openshift-gitops-operator 
+  source: redhat-operators 
+  sourceNamespace: openshift-marketplace 
+YAML
+}
+# ******** INSTALL gitea catalogue source  ASDK_CHECK
+resource "kubectl_manifest" "install-gitea-catalogue-source" {
+    yaml_body = <<YAML
+
+apiVersion: operators.coreos.com/v1alpha1
+kind: CatalogSource
+metadata:
+  name: redhat-gpte-gitea
+  namespace: openshift-marketplace
+spec:
+  sourceType: grpc
+  image: quay.internal.cloudapp.net/quay/oc-mirror/gpte-devops-automation/gitea-catalog:latest
+  displayName: Red Hat GPTE (Gitea)
+YAML
+}
+# ******** INSTALL gitea OPERATOR GROUP ASDK_OK
+resource "kubectl_manifest" "install-gitea-operator-group" {
+    yaml_body = <<YAML
+
+apiVersion: operators.coreos.com/v1
+kind: OperatorGroup
+metadata:
+  name: gitea-og
+  namespace: dso-gitea
+
+YAML
+}
+
+# ******** INSTALL gitea OPERATOR ASDK_CHECK
+resource "kubectl_manifest" "install-gitea-operator" {
+    yaml_body = <<YAML
+
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: gitea-operator
+  namespace: openshift-operators
+spec:
+  channel: stable
+  name: gitea-operator
+  source: redhat-gpte-gitea
+  sourceNamespace: openshift-marketplace
+
+YAML
+}
+
+# ******** CREATE ARGOCD INSTANCE
+resource "kubectl_manifest" "create-argocd-inst" {
+    yaml_body = <<YAML
+
+apiVersion: argoproj.io/v1alpha1
+kind: ArgoCD
+metadata:
+  name: iac-argocd
+  namespace: dso-iac-argocd
+spec:
+  server:
+    route:
+      enabled: true
+  rbac:
+    defaultPolicy: ''
+    policy: |
+      g, system:cluster-admins, role:admin
+      p, role:argo-admin, applications, *, */*, allow
+      p, role:argo-admin, clusters, get, *, allow
+      p, role:argo-admin, repositories, get, *, allow
+      p, role:argo-admin, repositories, create, *, allow
+      p, role:argo-admin, repositories, update, *, allow
+      p, role:argo-admin, repositories, delete, *, allow
+      g, system:authenticated, role:argo-admin
+    scopes: '[groups]'
+  dex:
+    openShiftOAuth: true
+    resources:
+      limits:
+        cpu: 500m
+        memory: 256Mi
+      requests:
+        cpu: 250m
+        memory: 128Mi
+
+YAML
+}
+
+# ******** CREATE SERVICE ACCOUNT ARGOCD
+resource "kubectl_manifest" "create-argocd-servacc" {
+    yaml_body = <<YAML
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: dso-iac-argocd-doer
+  namespace: dso-iac-argocd
+
+YAML
+}
+# ******** CONFIGURE Namespace to be managedby argomgd-argo 
+resource "kubectl_manifest" "configure-ns-to-be-managed" {
+    yaml_body = <<YAML
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: openshift-file-integrity
+  labels:
+    argocd.argoproj.io/managed-by: "argomgd-argo"
+  annotations:
+    openshift.io/display-name: 'openshift-file-integrity'
+
+YAML
+}
+# ******** Create ROLE ARGOCD
+resource "kubectl_manifest" "create-role-for-argocd" {
+    yaml_body = <<YAML
+
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: dso-iac-argocd-doer-clusterrole
+rules:
+  - verbs:
+      - get
+      - list
+      - watch
+    apiGroups:
+      - '*'
+    resources:
+      - '*'
+  - verbs:
+      - get
+      - list
+    nonResourceURLs:
+      - '*'
+  - verbs:
+      - '*'
+    apiGroups:
+      - operators.coreos.com
+    resources:
+      - '*'
+  - verbs:
+      - '*'
+    apiGroups:
+      - operator.openshift.io
+    resources:
+      - '*'
+  - verbs:
+      - '*'
+    apiGroups:
+      - user.openshift.io
+    resources:
+      - '*'
+  - verbs:
+      - '*'
+    apiGroups:
+      - config.openshift.io
+    resources:
+      - '*'
+  - verbs:
+      - '*'
+    apiGroups:
+      - console.openshift.io
+    resources:
+      - '*'
+  - verbs:
+      - '*'
+    apiGroups:
+      - ''
+    resources:
+      - namespaces
+      - persistentvolumeclaims
+      - persistentvolumes
+      - configmaps
+  - verbs:
+      - '*'
+    apiGroups:
+      - rbac.authorization.k8s.io
+    resources:
+      - '*'
+  - verbs:
+      - '*'
+    apiGroups:
+      - storage.k8s.io
+    resources:
+      - '*'
+  - verbs:
+      - '*'
+    apiGroups:
+      - machine.openshift.io
+    resources:
+      - '*'
+  - verbs:
+      - '*'
+    apiGroups:
+      - machineconfig.openshift.io
+    resources:
+      - '*'
+  - verbs:
+      - '*'
+    apiGroups:
+      - compliance.openshift.io
+    resources:
+      - scansettingbindings
+
+YAML
+}
+

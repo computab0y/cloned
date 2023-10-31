@@ -1,0 +1,12 @@
+apiVersion: fileintegrity.openshift.io/v1alpha1
+kind: FileIntegrity
+metadata:
+  name: storage-fileintegrity
+spec:
+  nodeSelector:
+    node-role.kubernetes.io/storage: ""
+  config: {}
+  tolerations:
+    - effect: NoSchedule
+      key: node.ocs.openshift.io/storage
+      operator: Exists

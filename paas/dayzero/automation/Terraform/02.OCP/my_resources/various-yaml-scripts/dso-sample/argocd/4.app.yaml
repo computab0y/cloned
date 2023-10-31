@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: dso-sample-app
+  namespace: argocd-manager11
+spec:
+  destination:
+    namespace: argocd-managed11
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    path: manifest
+    repoURL: https://github.com/semirmussa1/dso-sample.git
+    targetRevision: HEAD
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

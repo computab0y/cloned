@@ -1,0 +1,48 @@
+- op: replace
+  path: /spec/template/spec/providerSpec/value/subnet
+  value: compute_subnet
+
+- op: replace
+  path: /spec/template/spec/providerSpec/value/vnet
+  value: vnet-ocp3-sbox-uks
+
+- op: replace
+  path: /spec/template/spec/providerSpec/value/resourceGroup
+  value: rg-ocp3-sbox-uks
+
+- op: replace
+  path: /spec/template/spec/providerSpec/value/networkResourceGroup
+  value: rg-ocp3mgmt-sbox-uks
+
+- op: replace
+  path: /spec/template/spec/providerSpec/value/managedIdentity
+  value: ocp3-6px9x-identity
+
+- op: replace
+  path: /spec/template/spec/providerSpec/value/vmSize
+  value: Standard_D8s_v3
+
+- op: replace
+  path: /spec/template/spec/providerSpec/value/image/resourceID
+  value: /resourceGroups/rg-ocp3-sbox-uks/providers/Microsoft.Compute/images/ocp3-6px9x
+
+- op: replace
+  path: /spec/template/spec/providerSpec/value/location
+  value: uksouth
+
+- op: replace
+  path: /spec/template/spec/providerSpec/value/zone
+  value: 2
+
+- op: add
+  path: /spec/template/spec/metadata/labels
+  value: 
+    cluster.ocs.openshift.io/openshift-storage: ''
+    node-role.kubernetes.io/infra: ""
+    node-role.kubernetes.io/worker: ""
+
+- op: add
+  path: /spec/template/spec/taints/-
+  value:
+    key: node.ocs.openshift.io/storage
+    effect: NoSchedule

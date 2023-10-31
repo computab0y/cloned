@@ -1,0 +1,22 @@
+---
+FEATURE_USER_INITIALIZE: true
+BROWSER_API_CALLS_XHR_ONLY: false
+SUPER_USERS:
+- quayadmin
+FEATURE_USER_CREATION: true
+
+FEATURE_STORAGE_PROXY: true
+
+DISTRIBUTED_STORAGE_CONFIG:
+  default:
+    - RHOCSStorage
+    - access_key: mWnWFACLiWVAvXpzsNCL 
+      bucket_name: dso-quay-bucket-4aa801f9-ee14-4f64-9cc5-d07b2746f393 
+      hostname: s3-openshift-storage.apps.ocp4.azure.dso.digital.mod.uk
+      is_secure: true
+      port: "443"
+      secret_key: eB1Lz3BTemwSg5yXy0mMCo6jLhYDYNgjzd3zwwj9 
+      storage_path: /datastorage/registry
+DISTRIBUTED_STORAGE_DEFAULT_LOCATIONS: []
+DISTRIBUTED_STORAGE_PREFERENCE:
+  - default

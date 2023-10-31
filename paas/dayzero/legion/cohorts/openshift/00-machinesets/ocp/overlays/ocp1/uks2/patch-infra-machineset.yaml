@@ -1,0 +1,52 @@
+- op: replace
+  path: /spec/template/spec/providerSpec/value/subnet
+  value: control_plane_subnet
+
+- op: replace
+  path: /spec/template/spec/providerSpec/value/vnet
+  value: vnet-ocp1-prod-uks
+
+- op: replace
+  path: /spec/template/spec/providerSpec/value/resourceGroup
+  value: rg-ocp1-prod-uks
+
+- op: replace
+  path: /spec/template/spec/providerSpec/value/networkResourceGroup
+  value: rg-ocp1mgmt-prod-uks
+
+- op: replace
+  path: /spec/template/spec/providerSpec/value/managedIdentity
+  value: ocp1-kp7vk-identity
+
+- op: replace
+  path: /spec/template/spec/providerSpec/value/vmSize
+  value: Standard_D8s_v3
+
+- op: replace
+  path: /spec/template/spec/providerSpec/value/image/resourceID
+  value: /resourceGroups/rg-ocp1-prod-uks/providers/Microsoft.Compute/images/ocp1-kp7vk
+
+- op: replace
+  path: /spec/template/spec/providerSpec/value/location
+  value: uksouth
+
+- op: replace
+  path: /spec/template/spec/providerSpec/value/zone
+  value: 2
+
+- op: add
+  path: /spec/template/spec/metadata/labels
+  value: 
+    node-role.kubernetes.io/infra: ""
+
+- op: add
+  path: /spec/template/spec/taints/-
+  value:
+    key: node-role.kubernetes.io/infra
+    effect: NoSchedule
+
+- op: add
+  path: /spec/template/spec/taints/-
+  value:
+    key: node-role.kubernetes.io/infra
+    effect: NoExecute

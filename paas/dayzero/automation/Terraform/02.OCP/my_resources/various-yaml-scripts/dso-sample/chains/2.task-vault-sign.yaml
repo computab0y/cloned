@@ -1,0 +1,145 @@
+apiVersion: tekton.dev/v1beta1
+kind: ClusterTask
+metadata:
+  name: vault-sign
+spec:
+  workspaces:
+  - name: source
+  params:
+  - name: COSIGN-KEY
+    type: string
+    default: signing-secrets
+  - name: IMAGE
+    type: string
+    default: 'dso-quay-registry-quay-quay-enterprise.apps.ocp3.azure.dso.digital.mod.uk/dso-project/pipelines-vote-api:latest'
+  - name: CHAIN-NAMESPACE
+    type: string
+    default: chain-workshop     
+  - name: VAULT-ROLE
+    type: string
+    default: pipeline-quay
+  - name: VAULT-NAMESPACE
+    type: string
+    default: dso    
+  - name: VAULT-PATH
+    type: string
+    default: kv/data/quay
+
+  steps:
+  - env:
+      - name: VAULT_ROLE
+        value: $(params.VAULT-ROLE)
+      - name: VAULT_NAMESPACE
+        value: $(params.VAULT-NAMESPACE)
+      - name: VAULT_PATH
+        value: $(params.VAULT-PATH)
+          
+    name: get-quay-cred    
+    image: dso-quay-registry-quay-quay-enterprise.apps.ocp1.azure.dso.digital.mod.uk/dso-project/jq-curl:latest    
+    resources: {}
+    script: >
+      #!/bin/sh
+
+      set -eu
+
+      set +x # Set to -x for debugging otherwise ensure this is disabled
+
+      SERVICE_ACCOUNT_TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
+      
+      VAULT_CLIENT_API_RESPONSE=$(curl -H "X-Vault-Namespace: $VAULT_NAMESPACE" --request POST --data '{"jwt": "'$SERVICE_ACCOUNT_TOKEN'", "role": "'$VAULT_ROLE'"}' http://vault-ent.dso-tooling-vault.svc:8200/v1/auth/kubernetes/login)
+      CLIENT_TOKEN=$(echo $VAULT_CLIENT_API_RESPONSE | jq '.auth.client_token' -r)
+      # if [ -z "$($CLIENT_TOKEN)" ]
+      # then 
+      #   echo "[Vault] An error occured authenticating with vault via the current service account. Please ensure a role is binded to the current namespace and service account."
+      #   echo "more details are available here: https://www.vaultproject.io/docs/auth/kubernetes"
+      #   echo "Error Details:"
+      #   echo "$VAULT_CLIENT_API_RESPONSE"
+      # fi 
+      
+      VAULT_SECRET_API_RESPONSE=$(curl --retry 5 --retry-delay 5 -H "X-Vault-Token: $CLIENT_TOKEN" -H "X-Vault-Namespace: $VAULT_NAMESPACE" -X GET http://vault-ent.dso-tooling-vault.svc:8200/v1/$VAULT_PATH)
+      VAULT_SECRETS=$(echo $VAULT_SECRET_API_RESPONSE | jq .data.data)
+      # if [ -z "$($VAULT_SECRETS)" ]
+      # then 
+      #   echo "[Vault] An error occured in retrieving the specific secret at path $VAULT_PATH"
+      #   echo "Please ensure the current role has the required privillages."
+      #   echo "Error Details:"
+      #   echo "$VAULT_SECRET_API_RESPONSE"
+      # fi
+
+      QUAY_USERNAME=$(echo $VAULT_SECRETS | jq '.username  | select(. != null)' -r)
+      QUAY_PASSWORD=$(echo $VAULT_SECRETS | jq '.password  | select(. != null)' -r)
+      QUAY_AUTH=$(echo -ne "$QUAY_USERNAME:$QUAY_PASSWORD" | base64 -w 0)
+      
+      echo $QUAY_USERNAME   
+      echo $QUAY_PASSWORD
+
+      cd $(workspaces.source.path)
+
+      echo $QUAY_USERNAME > QUAY_USERNAME_ENV 
+
+      echo $QUAY_PASSWORD > QUAY_PASSWORD_ENV
+          
+      exit
+
+  - env:
+      - name: COSIGN_KEY
+        valueFrom:
+          secretKeyRef:
+            key: cosign.key
+            name: signing-secrets
+      - name: COSIGN_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            key: cosign.password
+            name: signing-secrets
+      - name: COSIGN_EXPERIMENTAL
+        value: '1'      
+    name: cosign-sign
+    image: 'gcr.io/projectsigstore/cosign:v1.6.0'
+    resources: {}
+    script: >
+      #!/busybox/env /busybox/sh
+
+      cd $(workspaces.source.path)
+      
+      USER=$(cat QUAY_USERNAME_ENV)
+      
+      PASS=$(cat QUAY_PASSWORD_ENV)
+
+      touch COSIGN_KEY_FILE.key
+
+      echo "$COSIGN_KEY" > COSIGN_KEY_FILE.key
+
+      PIPELINE_STATUS="SONARQUBE_SCAN_TRUE___++____QUAY_SCAN_TRUE"
+
+      CMD1="cosign login -u $USER -p $PASS 
+      dso-quay-registry-quay-quay-enterprise.apps.ocp1.azure.dso.digital.mod.uk"
+
+      CMD2="cosign sign --key COSIGN_KEY_FILE.key -a tag=$PIPELINE_STATUS
+      $(params.IMAGE)"
+
+      #echo $CMD1 
+
+      echo $CMD2
+
+      ERR_MSG="Failed to sign $(params.IMAGE)"
+
+      ${CMD1} &> result
+
+      ${CMD2} &> result1
+
+      err=$?
+
+      cat result
+
+      cat result1
+
+      if [[ ${err} -ne 0 ]]; then
+
+        echo "${ERR_MSG}"
+        exit 1
+      fi   
+   
+  volumes:
+    - name: varlibcontainers
+      emptyDir: {}

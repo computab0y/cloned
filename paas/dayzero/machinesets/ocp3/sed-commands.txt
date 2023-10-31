@@ -1,0 +1,6 @@
+sed -i 's/rg-ocp1-prod-uks/rg-ocp3-sbox-uks/g' *
+
+sed -i 's/rg-ocp1mgmt-prod-uks/rg-ocp3mgmt-sbox-uks/g' *
+
+sed -i 's/vnet-ocp1-prod-uks/vnet-ocp3-sbox-uks/g' *
+

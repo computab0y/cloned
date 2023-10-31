@@ -1,0 +1,14 @@
+apiVersion: redhatcop.redhat.io/v1alpha1
+kind: GroupSync
+metadata:
+  name: keycloak-groupsync
+spec:
+  schedule: "0 0 * * *"
+  providers:
+  - name: keycloak
+    keycloak:
+      realm: master
+      credentialsSecret:
+        name: keycloak-group-sync
+        namespace: group-sync-operator
+      url: patch_here

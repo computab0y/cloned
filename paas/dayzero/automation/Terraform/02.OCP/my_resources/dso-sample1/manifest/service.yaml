@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: dso-sample
+  namespace: dso-sample
+spec:
+  selector:
+    app: dso-sample
+    deploymentconfig: dso-sample
+  ipFamilies:
+    - IPv4
+  type: ClusterIP
+  ipFamilyPolicy: SingleStack
+  sessionAffinity: None
+  ports:
+    - name: 3333-tcp
+      protocol: TCP
+      port: 3333
+      targetPort: 3333

@@ -1,0 +1,15 @@
+resources:
+- deployment.yaml
+- route.yaml
+- service.yaml
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+# commonLabels:
+#   version: v1
+images:
+- name: dso-sample
+  newName: dso-quay-registry-quay-quay-enterprise.apps.ocp1.azure.dso.digital.mod.uk/dso-project/dso-sample
+  newTag: v1
+- name: dso-sample:latest
+  newName: dso-quay-registry-quay-quay-enterprise.apps.ocp1.azure.dso.digital.mod.uk/dso-project/dso-sample
+  newTag: latest

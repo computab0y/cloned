@@ -1,0 +1,63 @@
+apiVersion: machine.openshift.io/v1beta1
+kind: MachineSet
+metadata:
+  name: ocp3-6px9x-infra-uksouth1
+  namespace: openshift-machine-api
+  labels:
+    machine.openshift.io/cluster-api-cluster: ocp3-6px9x
+    machine.openshift.io/cluster-api-machine-role: worker
+    machine.openshift.io/cluster-api-machine-type: worker
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      machine.openshift.io/cluster-api-cluster: ocp3-6px9x
+      machine.openshift.io/cluster-api-machineset: ocp3-6px9x-infra-uksouth1
+  template:
+    metadata:
+      labels:
+        machine.openshift.io/cluster-api-cluster: ocp3-6px9x
+        machine.openshift.io/cluster-api-machine-role: worker
+        machine.openshift.io/cluster-api-machine-type: worker
+        machine.openshift.io/cluster-api-machineset: ocp3-6px9x-infra-uksouth1
+    spec:
+      metadata:
+        labels:
+          node-role.kubernetes.io/infra: ""
+      taints: 
+        - key: node-role.kubernetes.io/infra
+          effect: NoSchedule
+        - key: node-role.kubernetes.io/infra
+          effect: NoExecute
+      providerSpec:
+        value:
+          osDisk:
+            diskSizeGB: 256
+            managedDisk:
+              storageAccountType: Premium_LRS
+            osType: Linux
+          networkResourceGroup: <networkResourceGroup>
+          userDataSecret:
+            name: worker-user-data
+          vnet: 
+          credentialsSecret:
+            name: azure-cloud-credentials
+            namespace: openshift-machine-api
+          zone: '1'
+          metadata:
+            creationTimestamp: null
+          publicIP: false
+          resourceGroup: <resourceGroup>
+          kind: AzureMachineProviderSpec
+          location: uksouth
+          vmSize: Standard_D8s_v3
+          image:
+            offer: ''
+            publisher: ''
+            resourceID: >-
+              /resourceGroups/rg-ocp3-sbox-uks/providers/Microsoft.Compute/images/ocp3-6px9x
+            sku: ''
+            version: ''
+          managedIdentity: ocp3-6px9x-identity
+          subnet: {"filters":[{"name":"tag:Name","values":["cluster-fs2pg-wb22k-private-us-east-2c"]}]}
+          apiVersion: azureproviderconfig.openshift.io/v1beta1

@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: dso-sample
+    app.kubernetes.io/component: dso-sample
+    app.kubernetes.io/instance: dso-sample
+    app.kubernetes.io/name: dso-sample
+    app.kubernetes.io/part-of: dso-sample
+    app.openshift.io/runtime-namespace: dso-sample
+  name: dso-sample
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: dso-sample
+  template:
+    metadata:
+      labels:
+        app: dso-sample
+        deploymentconfig: dso-sample
+    spec:
+      containers:
+      - image: dso-quay-registry-quay-quay-enterprise.apps.ocp2.azure.dso.digital.mod.uk/dso-project/dso-sample:latest
+        imagePullPolicy: Always
+        name: dso-sample
+        ports:
+        - containerPort: 3333
+          protocol: TCP
+        resources: {}
+        terminationMessagePath: /dev/termination-log

@@ -1,0 +1,14 @@
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  labels:
+    operators.coreos.com/quay-operator.quay-enterprise: ""
+  name: quay-operator
+  namespace: quay-enterprise
+spec:
+  channel: patch_overlay_here
+  installPlanApproval: Automatic
+  name: quay-operator
+  source: redhat-operators
+  sourceNamespace: openshift-marketplace
+  startingCSV: patch_overlay_here

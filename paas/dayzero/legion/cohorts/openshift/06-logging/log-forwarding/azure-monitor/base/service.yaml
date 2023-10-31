@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: azure-monitor-clf-service
+  namespace: azure-monitor-clf
+  labels:
+    app.kubernetes.io/name: azure-monitor-clf
+spec:
+  ports:
+    - protocol: TCP
+      port: 24224
+      targetPort: 24224
+  selector:
+    app.kubernetes.io/name: azure-monitor-clf
+    

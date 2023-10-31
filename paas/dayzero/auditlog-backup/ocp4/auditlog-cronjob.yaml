@@ -1,0 +1,74 @@
+kind: CronJob
+apiVersion: batch/v1
+metadata:
+  name: cronjob-auditlog-backup
+  namespace: openshift-config
+  labels:
+    purpose: auditlog-backup
+spec:
+  schedule: "12 15 * * *"
+  startingDeadlineSeconds: 100
+  concurrencyPolicy: Forbid
+  suspend: false
+  jobTemplate:
+    spec:
+      backoffLimit: 0
+      template:
+        spec:
+          nodeSelector:
+            node-role.kubernetes.io/master: ''
+          restartPolicy: Never
+          activeDeadlineSeconds: 100
+          serviceAccountName: auditlog-backup
+          hostNetwork: true
+          containers:
+            - resources:
+                requests:
+                  cpu: 300m
+                  memory: 250Mi
+              terminationMessagePath: /dev/termination-log
+              name: auditlog-backup
+              command:
+                - /bin/sh
+                - '-c'
+                - >-
+                  /root/backup-audit-log.sh 2>&1
+              securityContext:
+                privileged: true
+              imagePullPolicy: IfNotPresent
+              volumeMounts:
+                - name: kubeconfig
+                  mountPath: /etc/kubernetes/
+                - name: auditlog-backup-script
+                  mountPath: /root/backup-audit-log.sh
+                  subPath: backup-audit-log.sh
+                - name: scripts
+                  mountPath: /usr/local/bin
+                - name: oc
+                  mountPath: /usr/bin/oc
+              terminationMessagePolicy: FallbackToLogsOnError
+              image: >-
+                quay.io/openshift-release-dev/ocp-v4.0-art-dev@sha256:74ade3d34106717d8fc5b5bd0931582dad5a7a5e1d1fe197e67b8ff2187749ec
+          serviceAccount: auditlog-backup
+          tolerations:
+            - operator: Exists
+              effect: NoSchedule
+            - operator: Exists
+              effect: NoExecute
+          volumes:
+            - name: kubeconfig
+              hostPath:
+                path: /etc/kubernetes
+                type: ''
+            - name: scripts
+              hostPath:
+                path: /usr/local/bin
+                type: ''
+            - name: oc
+              hostPath:
+                path: /usr/bin/oc
+                type: ''
+            - name: auditlog-backup-script
+              configMap:
+                name: auditlog-backup-script
+                defaultMode: 493

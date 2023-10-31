@@ -1,0 +1,35 @@
+- op: replace
+  path: /spec/template/spec/providerSpec/value/subnet
+  value: <cluster-name>-worker-subnet
+
+- op: replace
+  path: /spec/template/spec/providerSpec/value/vnet
+  value: <cluster-name>-vnet
+
+- op: replace
+  path: /spec/template/spec/providerSpec/value/resourceGroup
+  value: ocp-cluster
+
+- op: replace
+  path: /spec/template/spec/providerSpec/value/networkResourceGroup
+  value: ocp-cluster
+
+- op: replace
+  path: /spec/template/spec/providerSpec/value/managedIdentity
+  value: <cluster-name>-identity
+
+- op: replace
+  path: /spec/template/spec/providerSpec/value/vmSize
+  value: Standard_DS13_v2
+
+- op: replace
+  path: /spec/template/spec/providerSpec/value/image/resourceID
+  value: /resourceGroups/ocp-cluster/providers/Microsoft.Compute/images/<cluster-name>
+
+- op: replace
+  path: /spec/template/spec/providerSpec/value/location
+  value: cumulo01
+
+- op: replace
+  path: /spec/template/spec/providerSpec/value/zone
+  value: ""

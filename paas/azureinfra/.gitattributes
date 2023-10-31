@@ -1,0 +1,8 @@
+*.sh text eol=lf
+*.json text eol=lf
+*.yaml eol=lf
+
+*.png binary
+*.jpg binary
+
+*.cer binary

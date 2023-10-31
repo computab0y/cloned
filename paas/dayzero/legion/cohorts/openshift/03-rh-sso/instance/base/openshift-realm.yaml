@@ -1,0 +1,16 @@
+apiVersion: keycloak.org/v1alpha1
+kind: KeycloakRealm
+metadata:
+  labels:
+    app: keycloak
+  name: keycloak
+  namespace: keycloak
+spec:
+  realm:
+    id: sso
+    realm: sso
+    enabled: true
+    displayName: Openshift Authentication Realm
+  instanceSelector:
+    matchLabels:
+      app: keycloak

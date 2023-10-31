@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: machinesets
+  namespace: openshift-gitops
+spec:
+  project: default
+  source:
+    repoURL: https://gitea-i-dso-gitea.apps.ocp1.ocp.local/dso-mgr/dso-platform.git
+    targetRevision: main
+    path: dayzero/legion/cohorts/openshift/00-machinesets
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: openshift-machine-api
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

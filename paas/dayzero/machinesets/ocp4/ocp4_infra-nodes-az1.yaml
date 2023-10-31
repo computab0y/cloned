@@ -1,0 +1,63 @@
+apiVersion: machine.openshift.io/v1beta1
+kind: MachineSet
+metadata:
+  name: ocp4-4bn4s-infra-uksouth1
+  namespace: openshift-machine-api
+  labels:
+    machine.openshift.io/cluster-api-cluster: ocp4-4bn4s
+    machine.openshift.io/cluster-api-machine-role: worker
+    machine.openshift.io/cluster-api-machine-type: worker
+spec:
+  replicas: 0
+  selector:
+    matchLabels:
+      machine.openshift.io/cluster-api-cluster: ocp4-4bn4s
+      machine.openshift.io/cluster-api-machineset: ocp4-4bn4s-infra-uksouth1
+  template:
+    metadata:
+      labels:
+        machine.openshift.io/cluster-api-cluster: ocp4-4bn4s
+        machine.openshift.io/cluster-api-machine-role: worker
+        machine.openshift.io/cluster-api-machine-type: worker
+        machine.openshift.io/cluster-api-machineset: ocp4-4bn4s-infra-uksouth1
+    spec:
+      metadata:
+        labels:
+          node-role.kubernetes.io/infra: ""
+      taints: 
+        - key: node-role.kubernetes.io/infra
+          effect: NoSchedule
+        - key: node-role.kubernetes.io/infra
+          effect: NoExecute
+      providerSpec:
+        value:
+          osDisk:
+            diskSizeGB: 256
+            managedDisk:
+              storageAccountType: Premium_LRS
+            osType: Linux
+          networkResourceGroup: preda-infra-vnet
+          userDataSecret:
+            name: worker-user-data
+          vnet: preda-infra-yjjp-vnet
+          credentialsSecret:
+            name: azure-cloud-credentials
+            namespace: openshift-machine-api
+          zone: '1'
+          metadata:
+            creationTimestamp: null
+          publicIP: false
+          resourceGroup: rg-ocp4-sbox-uks
+          kind: AzureMachineProviderSpec
+          location: uksouth
+          vmSize: Standard_D8s_v3
+          image:
+            offer: ''
+            publisher: ''
+            resourceID: >-
+              /resourceGroups/rg-ocp4-sbox-uks/providers/Microsoft.Compute/images/ocp4-4bn4s
+            sku: ''
+            version: ''
+          managedIdentity: ocp4-4bn4s-identity
+          subnet: subnet2
+          apiVersion: azureproviderconfig.openshift.io/v1beta1

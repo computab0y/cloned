@@ -1,0 +1,11 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: dso-sample
+
+resources:
+- 2.vault-sign-pvc.yaml
+- 2.quay-robot-pull-secret.yaml
+- 2.signing-secrets.yaml
+- 2.link-secret-to-sa.yaml
+- 2.task-vault-sign.yaml

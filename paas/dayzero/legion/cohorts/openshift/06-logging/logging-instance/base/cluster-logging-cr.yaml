@@ -1,0 +1,68 @@
+apiVersion: logging.openshift.io/v1
+kind: ClusterLogging
+metadata:
+  namespace: openshift-logging
+  name: instance
+spec:
+  collection:
+    logs:
+      type: fluentd
+      fluentd:
+        tolerations:
+        - key: node.ocs.openshift.io/storage
+          effect: NoSchedule
+        - key: node-role.kubernetes.io/infra
+          effect: NoSchedule
+        - key: node-role.kubernetes.io/infra
+          effect: NoExecute
+  curation:
+    curator:
+      nodeSelector: 
+        node-role.kubernetes.io/infra: ''
+      tolerations:
+      - key: node.ocs.openshift.io/storage
+        effect: NoSchedule
+      - key: node-role.kubernetes.io/infra
+        effect: NoSchedule
+      - key: node-role.kubernetes.io/infra
+        effect: NoExecute
+      schedule: 30 3 * * *
+    type: curator
+  logStore:
+    elasticsearch:
+      nodeSelector: 
+        node-role.kubernetes.io/infra: ''
+      tolerations:
+      - key: node.ocs.openshift.io/storage
+        effect: NoSchedule
+      - key: node-role.kubernetes.io/infra
+        effect: NoSchedule
+      - key: node-role.kubernetes.io/infra
+        effect: NoExecute  
+      nodeCount: 3
+      redundancyPolicy: MultipleRedundancy
+      storage:
+        size: patch_here
+        storageClassName: patch_here
+    retentionPolicy:
+      application:
+        maxAge: 7d
+      audit:
+        maxAge: 7d
+      infra:
+        maxAge: 7d
+    type: elasticsearch
+  managementState: Managed
+  visualization:
+    kibana:
+      nodeSelector: 
+        node-role.kubernetes.io/infra: ''
+      tolerations:
+      - key: node.ocs.openshift.io/storage
+        effect: NoSchedule
+      - key: node-role.kubernetes.io/infra
+        effect: NoSchedule
+      - key: node-role.kubernetes.io/infra
+        effect: NoExecute
+      replicas: 1
+    type: kibana

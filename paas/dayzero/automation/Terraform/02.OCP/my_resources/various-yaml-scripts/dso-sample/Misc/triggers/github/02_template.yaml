@@ -1,0 +1,61 @@
+apiVersion: triggers.tekton.dev/v1alpha1
+kind: TriggerTemplate
+metadata:
+  name: juice-shop-trigger
+spec:
+  params:
+  - name: git-repo-url
+    description: The git repository url
+  - name: git-revision
+    description: The git revision
+    default: master
+  - name: git-repo-name
+    description: The name of the deployment to be created / patched
+  - name: git-commit-message
+    description: The comment message of the deployment to be created
+    default: needs_commit_message_summary
+    
+  resourcetemplates:
+  - apiVersion: tekton.dev/v1beta1
+    kind: PipelineRun
+    metadata:
+      generateName: dso-pl-juice-shop-$(tt.params.git-commit-message)-
+    spec:
+      pipelineRef:
+        name: dso-pl-juice-shop
+      params:
+      - name: GIT_URL
+        value: https://github.com/defencedigital/dso-project-juiceshop.git
+      - name: REVISION
+        value: master
+      - name: MANIFEST_GIT_URL
+        value: https://github.com/defencedigital/dso-pipeline-integration.git
+      - name: MANIFEST_REVISION
+        value: master
+      - name: IMAGE_REPOSITORY
+        value: dso-quay-registry-quay-quay-enterprise.apps.ocp1.azure.dso.digital.mod.uk/dso-project
+      - name: SERVICE_VERSION
+        value: $(tt.params.git-commit-message)
+      - name: REPO_NAME
+        value: dso-project-juiceshop
+      - name: SERVICE_NAME
+        value: juice-shop
+      - name: KUSTOMIZATION_PATH
+        value: juice-shop/Manifests
+      - name: SONAR_HOST_URL
+        value: https://sonarqube-https-dso-tooling-sonar.apps.ocp1.azure.dso.digital.mod.uk/
+      - name: SONAR_PROJECT_KEY
+        value: dso-juice-shop-s0nar-scan-quality-gate
+      - name: DEFAULT_IMAGE
+        value: juice-shop:latest
+      - name: VAULT_NAMESPACE
+        value: dso   
+      workspaces:
+      - name: shared-data
+        persistentvolumeclaim:
+          claimName: sonar-source-pvc
+      - name: shared-workspace
+        persistentvolumeclaim:
+          claimName: sonar-source-pvc
+      - name: sonar-settings
+        emptyDir: {}

@@ -1,0 +1,33 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  generateName: verify-image-pl-run-
+  namespace: deploy-sample
+spec:
+  params:
+    - name: ToolBoxUrl
+      value: dso-quay-registry-quay-quay-enterprise.apps.ocp3.azure.dso.digital.mod.uk/dso-project/dso-tool-box:latest
+    - name: srcCreds
+      value: dso-project+dso_pipeline_acc:T3GNU95T4ZFJCLK30UJW83VKKG7LHFGDO5OKI542K7R1DXCCHQGZ2O6IK6VZTU9D
+    - name: srcImageURL
+      value: dso-quay-registry-quay-quay-enterprise.apps.ocp1.azure.dso.digital.mod.uk/dso-project/dso-sample:sha256-13f26de43b313dc81caa4e2b07cc25a1346a921418ca7027578040ecf9844def.sig
+    - name: destCreds
+      value: dso-project+dso_pipeline_acc:6H18P0BFIDVLYLYYNO2GCMPMH91OGHG7F66A1JT6AQB30MWAQIK3Q4TVJC1KMEY4
+    - name: destImageURL
+      value: dso-quay-registry-quay-quay-enterprise.apps.ocp2.azure.dso.digital.mod.uk/dso-project/dso-sample:sha256-13f26de43b313dc81caa4e2b07cc25a1346a921418ca7027578040ecf9844def.sig
+    - name: destTLSverify
+      value: 'true'
+    - name: srcTLSverify
+      value: 'true'
+    - name: imageTag
+      value: latest
+    - name: quayToken
+      value: 6H18P0BFIDVLYLYYNO2GCMPMH91OGHG7F66A1JT6AQB30MWAQIK3Q4TVJC1KMEY4
+    - name: quayUrl
+      value: dso-quay-registry-quay-quay-enterprise.apps.ocp2.azure.dso.digital.mod.uk
+    - name: quayUser
+      value: dso-project+dso_pipeline_acc
+    - name: repoPath
+      value: dso-project/dso-sample
+  pipelineRef:
+    name: verify-image-pl

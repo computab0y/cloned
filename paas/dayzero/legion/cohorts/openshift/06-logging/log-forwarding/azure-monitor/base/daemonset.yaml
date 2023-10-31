@@ -1,0 +1,49 @@
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: azure-monitor-clf-ds
+  namespace: azure-monitor-clf
+  labels:
+    app.kubernetes.io/name: azure-monitor-clf
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: azure-monitor-clf
+  template:
+    metadata:
+      annotations: {}
+      labels:
+        app.kubernetes.io/name: azure-monitor-clf
+    spec:
+      nodeSelector:
+        kubernetes.io/os: linux
+      serviceAccountName: azure-monitor-clf-sa
+      terminationGracePeriodSeconds: 10
+      containers:
+      - name: fluent-bit
+        image: "fluent/fluent-bit:1.6"
+        imagePullPolicy: IfNotPresent
+        ports:
+          - containerPort: 2020
+          - containerPort: 24224
+        env:
+        - name: WorkspaceId
+          valueFrom:
+            secretKeyRef:
+              name: azure-monitor-clf-fluentbit-creds
+              key: WorkspaceId
+        - name: SharedKey
+          valueFrom:
+            secretKeyRef:
+              name: azure-monitor-clf-fluentbit-creds
+              key: SharedKey
+        - name: LogName
+          value: logapp
+        volumeMounts:
+          - name: fluent-bit-etc
+            mountPath: /fluent-bit/etc/
+      volumes:
+      - name: fluent-bit-etc
+        configMap:
+            name: azure-monitor-clf-config

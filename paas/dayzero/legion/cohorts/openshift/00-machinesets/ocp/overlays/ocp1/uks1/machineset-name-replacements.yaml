@@ -1,0 +1,12 @@
+# Replace cluster-api-cluster (Cluster API/Name combo)
+source:
+  kind: ConfigMap
+  name: env-properties
+  fieldPath: data.MACHINESET_NAME
+  version: v1
+targets:
+  - select:
+      name: template-machineset
+      kind: MachineSet
+    fieldPaths:
+    - metadata.name

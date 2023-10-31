@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: sample-hello-world
+  name: sample-hello-world
+spec:
+  selector:
+    matchLabels:
+      app: sample-hello-world
+  template:
+    metadata:
+      labels:
+        app: sample-hello-world
+    spec:
+      containers:
+      - image: image-registry.openshift-image-registry.svc:5000/dso-sample/sample-hello-world:latest
+        imagePullPolicy: Always
+        name: sample-hello-world
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+        resources: {}
+        terminationMessagePath: /dev/termination-log

@@ -1,0 +1,34 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: auditlog-backup-script
+  namespace: openshift-config
+data:
+  backup-audit-log.sh: |
+    #!/bin/bash
+    DATE=$(date +%Y%m%dT%H%M%S)
+    PATH=$PATH:/usr/bin/oc
+    AZ_AZCOPY_URL=$(curl -s -D- https://aka.ms/downloadazcopy-v10-linux | grep ^Location | cut -c11- | tr -d '\r')
+    AZ_BLOB_STORE=https://ocp1mg847a4b002a9bd2e2.blob.core.windows.net/auditlogs
+    AZ_SASKEY="sp=racwl&st=2022-02-07T09:42:48Z&se=2024-02-07T17:42:48Z&spr=https&sv=2020-08-04&sr=c&sig=ppjPZI4U90J4zNzI3XgD1s80pyfooa2rtB5B%2FKPE0b4%3D"
+    cd /tmp
+    echo "Retrieving Master nodes"
+    oc get nodes |grep master |cut -b 1-20 >servers.txt
+    for server in $(cat servers.txt) ; do
+     oc adm node-logs --path=/openshift-apiserver/ $server > auditlog.txt
+      for auditlog in $(cat auditlog.txt) ; do
+        oc adm node-logs --path=/openshift-apiserver/$auditlog $server > $server-$auditlog
+        echo "Collecting audit log $auditlog from $server"
+      done
+      rm $server-audit.log
+    done
+        echo 'Getting Azure azcopy CLI tool...'
+        wget -O azcopy.tar.gz "$AZ_AZCOPY_URL" && tar -xf azcopy.tar.gz --strip-components=1
+        echo 'Uploading audit logs to Azure Blob store'
+        ./azcopy copy "/tmp/*.log" $AZ_BLOB_STORE/$DATE/?$AZ_SASKEY --recursive=true
+    if [ $? -eq 0 ]; then
+        echo "Audit Files Successfully copied to Azure store $AZ_BLOB_STORE"
+        exit 0
+    fi
+        echo "Backup failed"
+        exit 1

@@ -1,0 +1,44 @@
+apiVersion: ocs.openshift.io/v1
+kind: StorageCluster
+metadata:
+  finalizers:
+  - storagecluster.ocs.openshift.io
+  name: ocs-storagecluster
+  namespace: openshift-storage
+spec:
+  arbiter: {}
+  encryption:
+    enable: true
+    kms: {}
+  externalStorage: {}
+  managedResources:
+    cephBlockPools: {}
+    cephConfig: {}
+    cephDashboard: {}
+    cephFilesystems: {}
+    cephObjectStoreUsers: {}
+    cephObjectStores: {}
+    multiCloudGateway: {}
+  nodeTopologies: {}
+  resources: {}
+  storageDeviceSets:
+  - config: {}
+    count: 1
+    dataPVCTemplate:
+      metadata: {}
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: patch_me_here
+        storageClassName: patch_me_here
+        volumeMode: Block
+    status: {}
+    name: patch_me_here
+    placement: {}
+    portable: true
+    preparePlacement: {}
+    replica: 3
+    resources: {}
+  version: 4.8.0

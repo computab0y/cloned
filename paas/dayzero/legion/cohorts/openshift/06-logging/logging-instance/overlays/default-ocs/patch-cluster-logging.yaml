@@ -1,0 +1,8 @@
+- op: replace
+  path: /spec/logStore/elasticsearch/storage/storageClassName
+  value: ocs-storagecluster-ceph-rbd
+
+- op: replace
+  path: /spec/logStore/elasticsearch/storage/size
+  value: 250G
+

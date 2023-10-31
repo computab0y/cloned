@@ -1,0 +1,17 @@
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: gitea-with-admin
+  namespace: dso-gitea
+  labels:
+    app: gitea-with-admin
+spec:
+  host: gitea-with-admin-dso-gitea.apps.ocp1.ocp.local
+  to:
+    kind: Service
+    name: gitea-with-admin
+    weight: 100
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
+  wildcardPolicy: None
