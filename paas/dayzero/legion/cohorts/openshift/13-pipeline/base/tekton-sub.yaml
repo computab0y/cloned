@@ -6,4 +6,6 @@ metadata:
 spec:
   channel: latest
   source: redhat-operators 
+  name: openshift-pipelines-operator-rh
+  namespace: openshift-operators
   sourceNamespace: openshift-marketplace 
