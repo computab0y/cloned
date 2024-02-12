@@ -7,9 +7,6 @@ namespace: openshift-config
 
 resources:
   - btg-clusterrolebinding.yaml
-  - btg-group.yaml
 
-secretGenerator:
-- name: btg-users-secret
-  files:
-  - users.htpasswd
+
+

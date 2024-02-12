@@ -1,15 +1,12 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  labels: 
-    app.kubernetest.io/instance: breakglass-rbac
-  name: local-admin-breakglass
+  name: btg-cluster-admin-role
+subjects:
+  - kind: User
+    apiGroup: rbac.authorization.k8s.io
+    name: btg_np-mgmt_account
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
   name: cluster-admin
-subjects:
-  - apiGroup: rbac.authorization.k8s.io
-    kind: Group
-    name: breakglass-accounts
-
