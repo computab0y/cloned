@@ -1,8 +1,0 @@
-apiVersion: objectbucket.io/v1alpha1
-kind: ObjectBucketClaim
-metadata:
-  name: dso-quay-bucket
-  namespace: quay-enterprise
-spec:
-  generateBucketName: dso-quay-bucket
-  storageClassName: openshift-storage.noobaa.io

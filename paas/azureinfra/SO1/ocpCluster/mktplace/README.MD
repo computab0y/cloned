@@ -1,1 +1,0 @@
-Enable Marketplace image for CIS L2 RHEL image.

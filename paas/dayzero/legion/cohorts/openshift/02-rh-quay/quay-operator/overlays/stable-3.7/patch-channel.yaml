@@ -1,7 +1,0 @@
-- op: replace
-  path: /spec/channel
-  value: stable-3.7
-
-- op: replace
-  path: /spec/startingCSV
-  value: quay-operator.v3.7.5

@@ -1,8 +1,0 @@
-apiVersion: triggers.tekton.dev/v1alpha1
-kind: EventListener
-metadata:
-  name: juice-shop-trigger
-spec:
-  serviceAccountName: pipeline
-  triggers:
-    - triggerRef: juice-shop-trigger

@@ -1,4 +1,0 @@
-# Patch the Keycloak endpoint
-- op: replace
-  path: /spec/providers/0/keycloak/url
-  value: https://keycloak-keycloak.apps.ocp1.azure.dso.digital.mod.uk

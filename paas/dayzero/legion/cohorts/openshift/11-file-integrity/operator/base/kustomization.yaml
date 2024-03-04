@@ -1,9 +1,0 @@
-apiVersion: kustomize.config.k8s.io/v1beta1
-kind: Kustomization
-
-namespace: openshift-file-integrity
-
-resources:
-  - fio-namespace.yaml
-  - fio-operatorgroup.yaml
-  - fio-subscription.yaml
